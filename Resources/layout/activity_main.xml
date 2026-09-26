@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_lock_power"
+                android:background="@drawable/bg_floating_btn"
+                android:padding="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/subtitle"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- CARD 1: STATUS UTAMA & TOGGLE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <View
+                    android:id="@+id/viewStatusDot"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:background="@drawable/bg_floating_btn"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tvStatusLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/status_inactive"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <Switch
+                    android:id="@+id/switchMainService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvStatusSubtext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Nyalakan saklar untuk mengaktifkan fitur ketuk 2x di layar Kassen."
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- CARD 2: PILIHAN MODE OPERASIONAL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_title"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="10dp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Mode Standby POS -->
+                <RadioButton
+                    android:id="@+id/radioModeStandby"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode_standby_title"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:checked="true" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode_standby_desc"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Mode Lock Penuh -->
+                <RadioButton
+                    android:id="@+id/radioModeLock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode_lock_title"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode_lock_desc"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginStart="32dp" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- CARD 3: PENGATURAN TOMBOL MELAYANG -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/floating_title"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/floating_enable"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
+
+                <Switch
+                    android:id="@+id/switchFloating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/floating_vibrate"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
+
+                <Switch
+                    android:id="@+id/switchVibrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <!-- Slider Transparansi -->
+            <TextView
+                android:id="@+id/tvAlphaLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Transparansi Tombol Melayang: 80%"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp" />
+
+            <SeekBar
+                android:id="@+id/seekBarAlpha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="80"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Slider Ukuran -->
+            <TextView
+                android:id="@+id/tvSizeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ukuran Tombol Melayang: Normal"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp" />
+
+            <SeekBar
+                android:id="@+id/seekBarSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="2"
+                android:progress="1" />
+        </LinearLayout>
+
+        <!-- CARD 4: SENSOR BANGUN LAYAR (DT2W SENSOR) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sensor_title"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/sensor_enable"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
+
+                <Switch
+                    android:id="@+id/switchSensorWake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mendeteksi getaran ketukan ganda fisik pada layar atau bodi perangkat Kassen saat layar mati total."
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:id="@+id/tvSensitivityLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sensitivitas Ketukan: Sedang"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp" />
+
+            <SeekBar
+                android:id="@+id/seekBarSensitivity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="2"
+                android:progress="1" />
+        </LinearLayout>
+
+        <!-- CARD 5: DAFTAR PERIZINAN SISTEM -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/permissions_title"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Izin 1: Overlay -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_overlay_title"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_overlay_desc"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnPermOverlay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:text="@string/btn_grant" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Izin 2: Accessibility -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_accessibility_title"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_accessibility_desc"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnPermAccessibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:text="@string/btn_grant" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Izin 3: Battery Optimization -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_battery_title"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/perm_battery_desc"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnPermBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:text="@string/btn_grant" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- CARD 6: UJI COBA FITUR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/test_title"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnTestStandby"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_button_primary"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:text="@string/btn_test_standby"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:id="@+id/btnTestScreenOff"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_button_secondary"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:text="@string/btn_test_screen_off"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:id="@+id/btnOpenGestures"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_button_secondary"
+                android:textColor="@color/accent"
+                android:text="@string/btn_open_system_gestures" />
+        </LinearLayout>
+
+        <!-- FOOTER -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/footer_note"
+            android:gravity="center"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp"
+            android:layout_marginBottom="24dp" />
+
+    </LinearLayout>
+</ScrollView>

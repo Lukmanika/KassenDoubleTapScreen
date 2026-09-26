@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.idea/
+.vscode/
+
+# Kecualikan file APK final agar tetap bisa di-push ke GitHub untuk didownload pengguna
+!KassenDoubleTap_XA02Pro.apk

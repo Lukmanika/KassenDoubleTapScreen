@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Double Tap Kassen</string>
+    <string name="accessibility_service_description">Layanan Aksesibilitas Kassen untuk mengunci dan mematikan layar dengan ketukan ganda tanpa menekan tombol power fisik.</string>
+    <string name="subtitle">Screen Off &amp; On Control - Kassen XA-02 Pro</string>
+    <string name="status_active">Layanan Aktif</string>
+    <string name="status_inactive">Layanan Nonaktif</string>
+    <string name="switch_enable_service">Aktifkan Fitur Double Tap</string>
+    <string name="mode_title">Pilih Mode Kerja</string>
+    <string name="mode_standby_title">1. Mode Siaga POS (Rekomendasi Kasir)</string>
+    <string name="mode_standby_desc">Layar langsung hitam pekat hemat daya. Ketuk 2x di mana saja langsung menyala seketika (0 ms delay).</string>
+    <string name="mode_lock_title">2. Mode Kunci Sistem Penuh (Native Lock)</string>
+    <string name="mode_lock_desc">Mengunci layar total melalui Aksesibilitas. Bangunkan layar dengan sensor getaran ketuk.</string>
+    <string name="floating_title">Pengaturan Tombol Melayang</string>
+    <string name="floating_enable">Tampilkan Tombol Melayang di Layar</string>
+    <string name="floating_vibrate">Getar saat Ketukan Terdeteksi</string>
+    <string name="floating_size_label">Ukuran Tombol Melayang</string>
+    <string name="floating_alpha_label">Transparansi Tombol</string>
+    <string name="sensor_title">Sensor Bangun Layar (Double Tap to Wake)</string>
+    <string name="sensor_enable">Bangunkan Layar dengan Sensor Ketukan (Accelerometer)</string>
+    <string name="sensor_sensitivity_label">Sensitivitas Sensor Ketukan</string>
+    <string name="permissions_title">Pemeriksaan Izin Sistem</string>
+    <string name="perm_overlay_title">Izin Tampilkan di Atas Aplikasi Lain</string>
+    <string name="perm_overlay_desc">Dibutuhkan untuk menampilkan tombol melayang.</string>
+    <string name="perm_accessibility_title">Izin Layanan Aksesibilitas</string>
+    <string name="perm_accessibility_desc">Dibutuhkan untuk mematikan layar sistem tanpa tombol fisik.</string>
+    <string name="perm_battery_title">Izin Abaikan Optimasi Baterai</string>
+    <string name="perm_battery_desc">Agar layanan tidak dihentikan oleh Safedroid OS saat POS standby.</string>
+    <string name="btn_grant">Izinkan</string>
+    <string name="btn_granted">Sudah Aktif ✓</string>
+    <string name="test_title">Uji Coba Fitur</string>
+    <string name="btn_test_screen_off">Tes Layar Mati Sekarang</string>
+    <string name="btn_test_standby">Tes Mode Siaga Hitam</string>
+    <string name="btn_open_system_gestures">Buka Pengaturan Gestur Kassen</string>
+    <string name="footer_note">Dirancang khusus untuk Kassen XA-02 Pro POS Terminal</string>
+</resources>
