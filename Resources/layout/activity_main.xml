@@ -106,13 +106,28 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Akses di Home Screen &amp; Aplikasi Kasir"
+                android:text="Gestur Tombol Navigasi Bawah (Aktif)"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
                 android:layout_marginBottom="10dp" />
 
-            <!-- Opsi 1: Bilah Status Bar Atas -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="✓ Double Tap Tombol HOME (Tengah Bawah) -> Matikan Layar / Siaga&#10;✓ Double Tap Tombol BACK (Kembali) -> Matikan Layar / Siaga&#10;✓ Double Tap Layar Hitam -> Layar Langsung Menyala"
+                android:textColor="@color/accent"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="12dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Opsi Tambahan: Bilah Status Bar Atas -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -129,7 +144,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1. Bilah Sentuh Atas (Status Bar)"
+                        android:text="Bilah Sentuh Status Bar Atas (Opsional)"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
@@ -137,7 +152,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ketuk 2x di bagian paling atas layar (area jam / sinyal) dari Home Screen."
+                        android:text="Bisa juga ketuk 2x di status bar atas (area jam/baterai)."
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>

@@ -266,7 +266,7 @@ namespace KassenDoubleTapScreen
                     int val = Math.Max(20, e.Progress);
                     AppSettings.SetFloatingAlpha(this, val);
                     UpdateAlphaLabel(val);
-                    FloatingOverlayService.Instance?.UpdateFloatingButtonAppearance();
+                    FloatingOverlayService.Instance?.RefreshOverlays();
                 };
             }
 
@@ -276,7 +276,7 @@ namespace KassenDoubleTapScreen
                 {
                     AppSettings.SetFloatingSize(this, e.Progress);
                     UpdateSizeLabel(e.Progress);
-                    FloatingOverlayService.Instance?.UpdateFloatingButtonAppearance();
+                    FloatingOverlayService.Instance?.RefreshOverlays();
                 };
             }
 
