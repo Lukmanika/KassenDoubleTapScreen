@@ -72,15 +72,16 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/status_inactive"
+                    android:text="@string/status_active"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textColor="#10B981" />
 
                 <Switch
                     android:id="@+id/switchMainService"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
             </LinearLayout>
 
             <TextView
@@ -88,12 +89,153 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Nyalakan saklar untuk mengaktifkan fitur ketuk 2x di layar Kassen."
+                android:text="Layanan aktif! Gunakan tombol melayang atau bilah atas layar untuk mematikan layar."
                 android:textSize="13sp"
                 android:textColor="@color/text_secondary" />
         </LinearLayout>
 
-        <!-- CARD 2: PILIHAN MODE OPERASIONAL -->
+        <!-- CARD 2: CARA MATIKAN DARI HOME SCREEN & APLIKASI -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Akses di Home Screen &amp; Aplikasi Kasir"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Opsi 1: Bilah Status Bar Atas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1. Bilah Sentuh Atas (Status Bar)"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ketuk 2x di bagian paling atas layar (area jam / sinyal) dari Home Screen."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switchTopBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Opsi 2: Tombol Melayang -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2. Tombol Melayang (Bisa Digeser)"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ikon gembok daya melayang yang bisa ditaruh di sudut layar."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/switchFloating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Pilihan Jumlah Ketukan -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pemicu Tombol Melayang:"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:layout_marginBottom="6dp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupTapCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioTapDouble"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="2x Ketuk (Double)"
+                    android:textSize="13sp"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/radioTapSingle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="1x Ketuk (Cepat)"
+                    android:textSize="13sp" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- CARD 3: PILIHAN MODE OPERASIONAL -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -129,7 +271,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/mode_standby_desc"
+                    android:text="Layar hitam pekat, digitizer tetap aktif. Ketuk 2x di mana saja langsung menyala seketika (0 ms delay). Paling cocok untuk Kassen XA 02 Pro."
                     android:textSize="12sp"
                     android:textColor="@color/text_secondary"
                     android:layout_marginStart="32dp"
@@ -147,14 +289,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/mode_lock_desc"
+                    android:text="Mengunci total via sistem. Saat layar padam total, sentuhan kaca dinonaktifkan sistem kernel (dibangunkan via sensor atau tombol power)."
                     android:textSize="12sp"
                     android:textColor="@color/text_secondary"
                     android:layout_marginStart="32dp" />
             </RadioGroup>
         </LinearLayout>
 
-        <!-- CARD 3: PENGATURAN TOMBOL MELAYANG -->
+        <!-- CARD 4: PENGATURAN TAMPILAN TOMBOL MELAYANG -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -166,33 +308,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/floating_title"
+                android:text="Kustomisasi Tombol Melayang"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
                 android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/floating_enable"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-
-                <Switch
-                    android:id="@+id/switchFloating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -221,7 +341,7 @@
                 android:id="@+id/tvAlphaLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Transparansi Tombol Melayang: 80%"
+                android:text="Transparansi Tombol: 85%"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
 
@@ -230,7 +350,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="100"
-                android:progress="80"
+                android:progress="85"
                 android:layout_marginBottom="10dp" />
 
             <!-- Slider Ukuran -->
@@ -238,7 +358,7 @@
                 android:id="@+id/tvSizeLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukuran Tombol Melayang: Normal"
+                android:text="Ukuran Tombol: Normal"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
 
@@ -250,7 +370,7 @@
                 android:progress="1" />
         </LinearLayout>
 
-        <!-- CARD 4: SENSOR BANGUN LAYAR (DT2W SENSOR) -->
+        <!-- CARD 5: SENSOR BANGUN LAYAR -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -262,7 +382,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sensor_title"
+                android:text="Sensor Bangun Layar (Saat Layar Mati Penuh)"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
@@ -279,7 +399,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/sensor_enable"
+                    android:text="Sensor Ketukan Fisik / Lambaian Tangan"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
 
@@ -293,7 +413,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mendeteksi getaran ketukan ganda fisik pada layar atau bodi perangkat Kassen saat layar mati total."
+                android:text="Mendeteksi ketukan bodi perangkat atau lambaian tangan di atas sensor depan Kassen saat layar terkunci."
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
                 android:layout_marginBottom="10dp" />
@@ -302,7 +422,7 @@
                 android:id="@+id/tvSensitivityLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sensitivitas Ketukan: Sedang"
+                android:text="Sensitivitas Sensor: Tinggi"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
 
@@ -311,10 +431,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="2"
-                android:progress="1" />
+                android:progress="2" />
         </LinearLayout>
 
-        <!-- CARD 5: DAFTAR PERIZINAN SISTEM -->
+        <!-- CARD 6: DAFTAR PERIZINAN SISTEM -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -464,7 +584,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- CARD 6: UJI COBA FITUR -->
+        <!-- CARD 7: UJI COBA CEPAT -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -489,7 +609,7 @@
                 android:background="@drawable/bg_button_primary"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
-                android:text="@string/btn_test_standby"
+                android:text="Tes Mode Siaga Hitam (Ketuk 2x untuk Bangun)"
                 android:layout_marginBottom="10dp" />
 
             <Button
@@ -499,16 +619,7 @@
                 android:background="@drawable/bg_button_secondary"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
-                android:text="@string/btn_test_screen_off"
-                android:layout_marginBottom="10dp" />
-
-            <Button
-                android:id="@+id/btnOpenGestures"
-                android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:background="@drawable/bg_button_secondary"
-                android:textColor="@color/accent"
-                android:text="@string/btn_open_system_gestures" />
+                android:text="Tes Kunci Layar Sistem Penuh" />
         </LinearLayout>
 
         <!-- FOOTER -->

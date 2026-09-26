@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationId>com.kassen.doubletap</ApplicationId>
-    <ApplicationVersion>2</ApplicationVersion>
-    <ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
+    <ApplicationVersion>3</ApplicationVersion>
+    <ApplicationDisplayVersion>1.2</ApplicationDisplayVersion>
     <ApplicationTitle>Double Tap Kassen</ApplicationTitle>
     <AndroidPackageFormats>apk</AndroidPackageFormats>
     <AndroidEnablePreDex>true</AndroidEnablePreDex>

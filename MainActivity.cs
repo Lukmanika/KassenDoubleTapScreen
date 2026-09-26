@@ -25,11 +25,16 @@ namespace KassenDoubleTapScreen
         private TextView? _tvStatusSubtext;
         private View? _viewStatusDot;
 
+        private Switch? _switchTopBar;
+        private Switch? _switchFloating;
+        private RadioGroup? _radioGroupTapCount;
+        private RadioButton? _radioTapDouble;
+        private RadioButton? _radioTapSingle;
+
         private RadioGroup? _radioGroupMode;
         private RadioButton? _radioModeStandby;
         private RadioButton? _radioModeLock;
 
-        private Switch? _switchFloating;
         private Switch? _switchVibrate;
         private SeekBar? _seekBarAlpha;
         private TextView? _tvAlphaLabel;
@@ -46,7 +51,6 @@ namespace KassenDoubleTapScreen
 
         private Button? _btnTestStandby;
         private Button? _btnTestScreenOff;
-        private Button? _btnOpenGestures;
 
         private bool _isUpdatingUi = false;
 
@@ -64,6 +68,12 @@ namespace KassenDoubleTapScreen
         {
             base.OnResume();
             RefreshPermissionsAndStatus();
+
+            // Jika izin overlay sudah ada dan service diaktifkan, pastikan service berjalan
+            if (HasOverlayPermission() && AppSettings.IsServiceEnabled(this))
+            {
+                StartAllServices();
+            }
         }
 
         private void InitViews()
@@ -73,11 +83,16 @@ namespace KassenDoubleTapScreen
             _tvStatusSubtext = FindViewById<TextView>(Resource.Id.tvStatusSubtext);
             _viewStatusDot = FindViewById<View>(Resource.Id.viewStatusDot);
 
+            _switchTopBar = FindViewById<Switch>(Resource.Id.switchTopBar);
+            _switchFloating = FindViewById<Switch>(Resource.Id.switchFloating);
+            _radioGroupTapCount = FindViewById<RadioGroup>(Resource.Id.radioGroupTapCount);
+            _radioTapDouble = FindViewById<RadioButton>(Resource.Id.radioTapDouble);
+            _radioTapSingle = FindViewById<RadioButton>(Resource.Id.radioTapSingle);
+
             _radioGroupMode = FindViewById<RadioGroup>(Resource.Id.radioGroupMode);
             _radioModeStandby = FindViewById<RadioButton>(Resource.Id.radioModeStandby);
             _radioModeLock = FindViewById<RadioButton>(Resource.Id.radioModeLock);
 
-            _switchFloating = FindViewById<Switch>(Resource.Id.switchFloating);
             _switchVibrate = FindViewById<Switch>(Resource.Id.switchVibrate);
             _seekBarAlpha = FindViewById<SeekBar>(Resource.Id.seekBarAlpha);
             _tvAlphaLabel = FindViewById<TextView>(Resource.Id.tvAlphaLabel);
@@ -94,7 +109,6 @@ namespace KassenDoubleTapScreen
 
             _btnTestStandby = FindViewById<Button>(Resource.Id.btnTestStandby);
             _btnTestScreenOff = FindViewById<Button>(Resource.Id.btnTestScreenOff);
-            _btnOpenGestures = FindViewById<Button>(Resource.Id.btnOpenGestures);
         }
 
         private void LoadSettingsToUi()
@@ -103,6 +117,19 @@ namespace KassenDoubleTapScreen
 
             bool isEnabled = AppSettings.IsServiceEnabled(this);
             if (_switchMain != null) _switchMain.Checked = isEnabled;
+
+            if (_switchTopBar != null) _switchTopBar.Checked = AppSettings.IsTopBarEnabled(this);
+            if (_switchFloating != null) _switchFloating.Checked = AppSettings.IsFloatingEnabled(this);
+
+            string tapMode = AppSettings.GetTapTriggerMode(this);
+            if (tapMode == "single")
+            {
+                if (_radioTapSingle != null) _radioTapSingle.Checked = true;
+            }
+            else
+            {
+                if (_radioTapDouble != null) _radioTapDouble.Checked = true;
+            }
 
             string mode = AppSettings.GetOperationMode(this);
             if (mode == "lock")
@@ -114,7 +141,6 @@ namespace KassenDoubleTapScreen
                 if (_radioModeStandby != null) _radioModeStandby.Checked = true;
             }
 
-            if (_switchFloating != null) _switchFloating.Checked = AppSettings.IsFloatingEnabled(this);
             if (_switchVibrate != null) _switchVibrate.Checked = AppSettings.IsVibrateEnabled(this);
 
             int alpha = AppSettings.GetFloatingAlpha(this);
@@ -143,7 +169,7 @@ namespace KassenDoubleTapScreen
 
                     if (e.IsChecked)
                     {
-                        if (Build.VERSION.SdkInt >= BuildVersionCodes.M && !Settings.CanDrawOverlays(this))
+                        if (!HasOverlayPermission())
                         {
                             Toast.MakeText(this, "Silakan izinkan 'Tampilkan di atas aplikasi lain' terlebih dahulu.", ToastLength.Long)?.Show();
                             RequestOverlayPermission();
@@ -163,6 +189,44 @@ namespace KassenDoubleTapScreen
                     }
 
                     RefreshPermissionsAndStatus();
+                };
+            }
+
+            if (_switchTopBar != null)
+            {
+                _switchTopBar.CheckedChange += (s, e) =>
+                {
+                    if (_isUpdatingUi) return;
+                    AppSettings.SetTopBarEnabled(this, e.IsChecked);
+                    FloatingOverlayService.Instance?.RefreshOverlays();
+                };
+            }
+
+            if (_switchFloating != null)
+            {
+                _switchFloating.CheckedChange += (s, e) =>
+                {
+                    if (_isUpdatingUi) return;
+                    AppSettings.SetFloatingEnabled(this, e.IsChecked);
+                    FloatingOverlayService.Instance?.RefreshOverlays();
+                };
+            }
+
+            if (_radioGroupTapCount != null)
+            {
+                _radioGroupTapCount.CheckedChange += (s, e) =>
+                {
+                    if (_isUpdatingUi) return;
+                    if (e.CheckedId == Resource.Id.radioTapSingle)
+                    {
+                        AppSettings.SetTapTriggerMode(this, "single");
+                        Toast.MakeText(this, "Mode 1x Ketuk aktif: Cukup sentuh 1x untuk mematikan layar.", ToastLength.Short)?.Show();
+                    }
+                    else
+                    {
+                        AppSettings.SetTapTriggerMode(this, "double");
+                        Toast.MakeText(this, "Mode 2x Ketuk aktif: Ketuk ganda untuk mematikan layar.", ToastLength.Short)?.Show();
+                    }
                 };
             }
 
@@ -186,20 +250,6 @@ namespace KassenDoubleTapScreen
                 };
             }
 
-            if (_switchFloating != null)
-            {
-                _switchFloating.CheckedChange += (s, e) =>
-                {
-                    if (_isUpdatingUi) return;
-                    AppSettings.SetFloatingEnabled(this, e.IsChecked);
-                    if (AppSettings.IsServiceEnabled(this))
-                    {
-                        if (e.IsChecked) StartOverlayService();
-                        else StopOverlayService();
-                    }
-                };
-            }
-
             if (_switchVibrate != null)
             {
                 _switchVibrate.CheckedChange += (s, e) =>
@@ -213,10 +263,10 @@ namespace KassenDoubleTapScreen
             {
                 _seekBarAlpha.ProgressChanged += (s, e) =>
                 {
-                    int val = Math.Max(15, e.Progress);
+                    int val = Math.Max(20, e.Progress);
                     AppSettings.SetFloatingAlpha(this, val);
                     UpdateAlphaLabel(val);
-                    FloatingOverlayService.Instance?.UpdateFloatingAppearance();
+                    FloatingOverlayService.Instance?.UpdateFloatingButtonAppearance();
                 };
             }
 
@@ -226,7 +276,7 @@ namespace KassenDoubleTapScreen
                 {
                     AppSettings.SetFloatingSize(this, e.Progress);
                     UpdateSizeLabel(e.Progress);
-                    FloatingOverlayService.Instance?.UpdateFloatingAppearance();
+                    FloatingOverlayService.Instance?.UpdateFloatingButtonAppearance();
                 };
             }
 
@@ -278,24 +328,16 @@ namespace KassenDoubleTapScreen
                     StartActivity(intent);
                 }
             }));
+        }
 
-            _btnOpenGestures?.SetOnClickListener(new ViewClickListener(_ =>
-            {
-                try
-                {
-                    var intent = new Intent(Settings.ActionDisplaySettings);
-                    StartActivity(intent);
-                }
-                catch
-                {
-                    Toast.MakeText(this, "Gagal membuka menu pengaturan layar.", ToastLength.Short)?.Show();
-                }
-            }));
+        private bool HasOverlayPermission()
+        {
+            return Build.VERSION.SdkInt < BuildVersionCodes.M || Settings.CanDrawOverlays(this);
         }
 
         private void RefreshPermissionsAndStatus()
         {
-            bool hasOverlay = Build.VERSION.SdkInt < BuildVersionCodes.M || Settings.CanDrawOverlays(this);
+            bool hasOverlay = HasOverlayPermission();
             bool hasAccessibility = KassenAccessibilityService.IsRunning(this);
             bool hasBatteryExemption = IsBatteryExempted();
 
@@ -303,20 +345,20 @@ namespace KassenDoubleTapScreen
             UpdatePermissionButton(_btnPermAccessibility, hasAccessibility, "Izin Aksesibilitas");
             UpdatePermissionButton(_btnPermBattery, hasBatteryExemption, "Abaikan Baterai");
 
-            bool isEnabled = AppSettings.IsServiceEnabled(this);
+            bool isEnabled = AppSettings.IsServiceEnabled(this) && hasOverlay;
 
             if (isEnabled)
             {
                 _tvStatusLabel?.SetText(Resource.String.status_active);
                 _tvStatusLabel?.SetTextColor(Color.ParseColor("#10B981"));
-                _tvStatusSubtext?.SetText("Layanan Double Tap aktif dan siap digunakan kasir.", TextView.BufferType.Normal);
+                _tvStatusSubtext?.SetText("Layanan aktif! Gunakan tombol melayang atau ketuk 2x di status bar atas dari Home Screen.", TextView.BufferType.Normal);
                 _viewStatusDot?.SetBackgroundResource(Resource.Drawable.bg_floating_btn);
             }
             else
             {
                 _tvStatusLabel?.SetText(Resource.String.status_inactive);
                 _tvStatusLabel?.SetTextColor(Color.ParseColor("#EF4444"));
-                _tvStatusSubtext?.SetText("Nyalakan saklar untuk mengaktifkan fitur ketuk 2x di layar Kassen.", TextView.BufferType.Normal);
+                _tvStatusSubtext?.SetText("Nyalakan saklar di atas dan berikan izin overlay agar fitur bisa digunakan.", TextView.BufferType.Normal);
                 _viewStatusDot?.SetBackgroundResource(Resource.Drawable.bg_card);
             }
         }
@@ -405,10 +447,7 @@ namespace KassenDoubleTapScreen
 
         private void StartAllServices()
         {
-            if (AppSettings.IsFloatingEnabled(this))
-            {
-                StartOverlayService();
-            }
+            StartOverlayService();
             if (AppSettings.IsSensorWakeEnabled(this))
             {
                 StartSensorWakeService();
@@ -423,6 +462,8 @@ namespace KassenDoubleTapScreen
 
         private void StartOverlayService()
         {
+            if (!HasOverlayPermission()) return;
+
             try
             {
                 var intent = new Intent(this, typeof(FloatingOverlayService));
@@ -502,8 +543,8 @@ namespace KassenDoubleTapScreen
             string name = sensIndex switch
             {
                 0 => "Rendah (Butuh ketukan mantap)",
-                2 => "Tinggi (Ketukan ringan)",
-                _ => "Sedang (Rekomendasi)"
+                1 => "Sedang",
+                _ => "Tinggi (Rekomendasi - Mudah Bangun)"
             };
             if (_tvSensitivityLabel != null)
                 _tvSensitivityLabel.Text = $"Sensitivitas Sensor: {name}";

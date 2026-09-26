@@ -10,23 +10,26 @@ using Android.Widget;
 namespace KassenDoubleTapScreen
 {
     [Service(Label = "Kassen Floating DoubleTap", Exported = false)]
-    public class FloatingOverlayService : Service, View.IOnTouchListener, GestureDetector.IOnGestureListener, GestureDetector.IOnDoubleTapListener
+    public class FloatingOverlayService : Service
     {
         private const string ChannelId = "kassen_overlay_service_channel";
         private const int NotificationId = 1001;
 
         private IWindowManager? _windowManager;
-        private View? _floatingView;
-        private WindowManagerLayoutParams? _layoutParams;
-        private GestureDetector? _gestureDetector;
+        private View? _floatingButtonView;
+        private View? _topBarView;
+        private WindowManagerLayoutParams? _buttonLayoutParams;
+        private WindowManagerLayoutParams? _topBarLayoutParams;
         private Vibrator? _vibrator;
 
-        private int _initialX;
-        private int _initialY;
-        private float _initialTouchX;
-        private float _initialTouchY;
-        private bool _isDragging = false;
-        private int _touchSlop = 10;
+        // Variabel pelacak gestur tombol melayang
+        private float _btnStartX, _btnStartY;
+        private int _btnInitX, _btnInitY;
+        private bool _btnIsMoving = false;
+        private long _btnLastTapTime = 0;
+
+        // Variabel pelacak gestur bilah atas (top bar)
+        private long _topBarLastTapTime = 0;
 
         public static FloatingOverlayService? Instance { get; private set; }
 
@@ -39,28 +42,24 @@ namespace KassenDoubleTapScreen
 #pragma warning disable CA1422
             _vibrator = (Vibrator?)GetSystemService(VibratorService);
 #pragma warning restore CA1422
-            _gestureDetector = new GestureDetector(this, this);
-            _gestureDetector.SetOnDoubleTapListener(this);
-
-            var vc = ViewConfiguration.Get(this);
-            _touchSlop = vc?.ScaledTouchSlop ?? 10;
 
             CreateNotificationChannel();
             var notification = BuildNotification();
             StartForeground(NotificationId, notification);
 
-            ShowFloatingButton();
+            RefreshOverlays();
         }
 
         public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
         {
-            UpdateFloatingAppearance();
+            RefreshOverlays();
             return StartCommandResult.Sticky;
         }
 
         public override void OnDestroy()
         {
             RemoveFloatingButton();
+            RemoveTopBar();
             if (Instance == this)
             {
                 Instance = null;
@@ -70,29 +69,51 @@ namespace KassenDoubleTapScreen
 
         public override IBinder? OnBind(Intent? intent) => null;
 
-        private void ShowFloatingButton()
+        public void RefreshOverlays()
         {
-            if (_floatingView != null || _windowManager == null) return;
-
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M && !Settings.CanDrawOverlays(this))
             {
-                // Tidak memiliki izin overlay
+                return;
+            }
+
+            if (AppSettings.IsFloatingEnabled(this))
+            {
+                ShowFloatingButton();
+            }
+            else
+            {
+                RemoveFloatingButton();
+            }
+
+            if (AppSettings.IsTopBarEnabled(this))
+            {
+                ShowTopBar();
+            }
+            else
+            {
+                RemoveTopBar();
+            }
+        }
+
+        private void ShowFloatingButton()
+        {
+            if (_windowManager == null) return;
+
+            if (_floatingButtonView != null)
+            {
+                UpdateFloatingButtonAppearance();
                 return;
             }
 
             var inflater = (LayoutInflater?)GetSystemService(LayoutInflaterService);
-            _floatingView = inflater?.Inflate(Resource.Layout.view_floating_button, null);
-            if (_floatingView == null) return;
-
-            _floatingView.SetOnTouchListener(this);
+            _floatingButtonView = inflater?.Inflate(Resource.Layout.view_floating_button, null);
+            if (_floatingButtonView == null) return;
 
             var displayMetrics = Resources?.DisplayMetrics;
             int screenWidth = displayMetrics?.WidthPixels ?? 720;
             int screenHeight = displayMetrics?.HeightPixels ?? 1280;
 
-            int sizeDp = GetButtonSizeDp();
-            int sizePx = DpToPx(sizeDp);
-
+            int sizePx = DpToPx(GetButtonSizeDp());
             int savedX = AppSettings.GetFloatingX(this, screenWidth - sizePx - DpToPx(16));
             int savedY = AppSettings.GetFloatingY(this, screenHeight / 3);
 
@@ -100,7 +121,7 @@ namespace KassenDoubleTapScreen
                 ? WindowManagerTypes.ApplicationOverlay
                 : WindowManagerTypes.Phone;
 
-            _layoutParams = new WindowManagerLayoutParams(
+            _buttonLayoutParams = new WindowManagerLayoutParams(
                 sizePx,
                 sizePx,
                 layoutType,
@@ -113,63 +134,116 @@ namespace KassenDoubleTapScreen
                 Y = Math.Max(0, Math.Min(savedY, screenHeight - sizePx))
             };
 
-            UpdateFloatingAppearance();
+            // Pasang Touch Listener dengan deteksi tap & drag mandiri yang akurat
+            _floatingButtonView.SetOnTouchListener(new ButtonTouchListener(this));
 
             try
             {
-                _windowManager.AddView(_floatingView, _layoutParams);
+                _windowManager.AddView(_floatingButtonView, _buttonLayoutParams);
+                UpdateFloatingButtonAppearance();
             }
             catch (Exception)
             {
-                // Gagal menambahkan view overlay
+                _floatingButtonView = null;
             }
         }
 
-        public void UpdateFloatingAppearance()
+        private void ShowTopBar()
         {
-            if (_floatingView == null) return;
+            if (_windowManager == null) return;
+            if (_topBarView != null) return;
+
+            // Buat view transparan di area status bar pojok atas (zona ketuk ganda di atas layar)
+            _topBarView = new View(this);
+            _topBarView.SetBackgroundColor(Color.Transparent);
+
+            var displayMetrics = Resources?.DisplayMetrics;
+            int screenWidth = displayMetrics?.WidthPixels ?? 720;
+
+            var layoutType = Build.VERSION.SdkInt >= BuildVersionCodes.O
+                ? WindowManagerTypes.ApplicationOverlay
+                : WindowManagerTypes.Phone;
+
+            // Lebar: seluruh area atas layar atau 200dp pojok kanan, tinggi 42dp
+            _topBarLayoutParams = new WindowManagerLayoutParams(
+                WindowManagerLayoutParams.MatchParent,
+                DpToPx(42),
+                layoutType,
+                WindowManagerFlags.NotFocusable | WindowManagerFlags.LayoutInScreen,
+                Format.Translucent
+            )
+            {
+                Gravity = GravityFlags.Top | GravityFlags.CenterHorizontal,
+                X = 0,
+                Y = 0
+            };
+
+            _topBarView.SetOnTouchListener(new TopBarTouchListener(this));
+
+            try
+            {
+                _windowManager.AddView(_topBarView, _topBarLayoutParams);
+            }
+            catch (Exception)
+            {
+                _topBarView = null;
+            }
+        }
+
+        public void UpdateFloatingButtonAppearance()
+        {
+            if (_floatingButtonView == null || _buttonLayoutParams == null) return;
 
             int alphaPercent = AppSettings.GetFloatingAlpha(this);
-            float alpha = Math.Max(0.15f, alphaPercent / 100.0f);
-            _floatingView.Alpha = alpha;
+            float alpha = Math.Max(0.20f, alphaPercent / 100.0f);
+            _floatingButtonView.Alpha = alpha;
 
-            var icon = _floatingView.FindViewById<ImageView>(Resource.Id.imgFloatingIcon);
-            int sizeDp = GetButtonSizeDp();
-            int sizePx = DpToPx(sizeDp);
-
+            int sizePx = DpToPx(GetButtonSizeDp());
+            var icon = _floatingButtonView.FindViewById<ImageView>(Resource.Id.imgFloatingIcon);
             if (icon != null)
             {
-                var iconParams = icon.LayoutParameters;
-                if (iconParams != null)
+                var p = icon.LayoutParameters;
+                if (p != null)
                 {
-                    iconParams.Width = sizePx;
-                    iconParams.Height = sizePx;
-                    icon.LayoutParameters = iconParams;
+                    p.Width = sizePx;
+                    p.Height = sizePx;
+                    icon.LayoutParameters = p;
                 }
             }
 
-            if (_layoutParams != null && _windowManager != null)
+            _buttonLayoutParams.Width = sizePx;
+            _buttonLayoutParams.Height = sizePx;
+
+            try
             {
-                _layoutParams.Width = sizePx;
-                _layoutParams.Height = sizePx;
-                try
-                {
-                    _windowManager.UpdateViewLayout(_floatingView, _layoutParams);
-                }
-                catch { }
+                _windowManager?.UpdateViewLayout(_floatingButtonView, _buttonLayoutParams);
             }
+            catch { }
         }
 
         private void RemoveFloatingButton()
         {
-            if (_floatingView != null && _windowManager != null)
+            if (_floatingButtonView != null && _windowManager != null)
             {
                 try
                 {
-                    _windowManager.RemoveView(_floatingView);
+                    _windowManager.RemoveView(_floatingButtonView);
                 }
                 catch { }
-                _floatingView = null;
+                _floatingButtonView = null;
+            }
+        }
+
+        private void RemoveTopBar()
+        {
+            if (_topBarView != null && _windowManager != null)
+            {
+                try
+                {
+                    _windowManager.RemoveView(_topBarView);
+                }
+                catch { }
+                _topBarView = null;
             }
         }
 
@@ -178,9 +252,9 @@ namespace KassenDoubleTapScreen
             int sizeIndex = AppSettings.GetFloatingSize(this);
             return sizeIndex switch
             {
-                0 => 42, // Kecil
-                2 => 62, // Besar
-                _ => 52  // Normal
+                0 => 44, // Kecil
+                2 => 66, // Besar
+                _ => 54  // Normal
             };
         }
 
@@ -188,6 +262,33 @@ namespace KassenDoubleTapScreen
         {
             float density = Resources?.DisplayMetrics?.Density ?? 1.0f;
             return (int)(dp * density + 0.5f);
+        }
+
+        public void TriggerScreenOffAction()
+        {
+            VibrateFeedback();
+
+            string mode = AppSettings.GetOperationMode(this);
+
+            if (mode == "standby")
+            {
+                // Mode Siaga Layar Hitam (Rekomendasi Utama Kassen POS)
+                var standbyIntent = new Intent(this, typeof(StandbyActivity));
+                standbyIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.SingleTop);
+                StartActivity(standbyIntent);
+            }
+            else
+            {
+                // Mode Kunci Sistem Penuh (via Aksesibilitas)
+                bool locked = KassenAccessibilityService.LockScreen();
+                if (!locked)
+                {
+                    // Fallback otomatis ke Mode Siaga jika aksesibilitas belum aktif
+                    var standbyIntent = new Intent(this, typeof(StandbyActivity));
+                    standbyIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.SingleTop);
+                    StartActivity(standbyIntent);
+                }
+            }
         }
 
         private void VibrateFeedback()
@@ -199,11 +300,11 @@ namespace KassenDoubleTapScreen
 #pragma warning disable CA1422
                     if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                     {
-                        _vibrator.Vibrate(VibrationEffect.CreateOneShot(50, VibrationEffect.DefaultAmplitude));
+                        _vibrator.Vibrate(VibrationEffect.CreateOneShot(55, VibrationEffect.DefaultAmplitude));
                     }
                     else
                     {
-                        _vibrator.Vibrate(50);
+                        _vibrator.Vibrate(55);
                     }
 #pragma warning restore CA1422
                 }
@@ -211,101 +312,122 @@ namespace KassenDoubleTapScreen
             catch { }
         }
 
-        private void ExecuteDoubleTapAction()
+        // Listener Sentuh Tombol Melayang
+        private class ButtonTouchListener : Java.Lang.Object, View.IOnTouchListener
         {
-            VibrateFeedback();
+            private readonly FloatingOverlayService _svc;
 
-            string mode = AppSettings.GetOperationMode(this);
+            public ButtonTouchListener(FloatingOverlayService svc) => _svc = svc;
 
-            if (mode == "standby")
+            public bool OnTouch(View? v, MotionEvent? e)
             {
-                // Mode Siaga Layar Hitam (Rekomendasi POS Kassen)
-                var standbyIntent = new Intent(this, typeof(StandbyActivity));
-                standbyIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.SingleTop);
-                StartActivity(standbyIntent);
-            }
-            else
-            {
-                // Mode Kunci Sistem Penuh (via Aksesibilitas)
-                bool locked = KassenAccessibilityService.LockScreen();
-                if (!locked)
+                if (e == null || _svc._buttonLayoutParams == null || _svc._windowManager == null)
+                    return false;
+
+                switch (e.Action)
                 {
-                    // Jika Aksesibilitas belum diaktifkan, alihkan ke Mode Standby agar kasir tetap bisa mematikan layar
-                    var standbyIntent = new Intent(this, typeof(StandbyActivity));
-                    standbyIntent.AddFlags(ActivityFlags.NewTask | ActivityFlags.SingleTop);
-                    StartActivity(standbyIntent);
-                }
-            }
-        }
+                    case MotionEventActions.Down:
+                        _svc._btnStartX = e.RawX;
+                        _svc._btnStartY = e.RawY;
+                        _svc._btnInitX = _svc._buttonLayoutParams.X;
+                        _svc._btnInitY = _svc._buttonLayoutParams.Y;
+                        _svc._btnIsMoving = false;
+                        return true;
 
-        // View.IOnTouchListener
-        public bool OnTouch(View? v, MotionEvent? e)
-        {
-            if (e == null || _layoutParams == null || _windowManager == null) return false;
+                    case MotionEventActions.Move:
+                        float dx = e.RawX - _svc._btnStartX;
+                        float dy = e.RawY - _svc._btnStartY;
 
-            _gestureDetector?.OnTouchEvent(e);
-
-            switch (e.Action)
-            {
-                case MotionEventActions.Down:
-                    _initialX = _layoutParams.X;
-                    _initialY = _layoutParams.Y;
-                    _initialTouchX = e.RawX;
-                    _initialTouchY = e.RawY;
-                    _isDragging = false;
-                    return true;
-
-                case MotionEventActions.Move:
-                    float dx = e.RawX - _initialTouchX;
-                    float dy = e.RawY - _initialTouchY;
-
-                    if (!_isDragging && (Math.Abs(dx) > _touchSlop || Math.Abs(dy) > _touchSlop))
-                    {
-                        _isDragging = true;
-                    }
-
-                    if (_isDragging)
-                    {
-                        _layoutParams.X = _initialX + (int)dx;
-                        _layoutParams.Y = _initialY + (int)dy;
-                        try
+                        if (!_svc._btnIsMoving && (Math.Abs(dx) > 25 || Math.Abs(dy) > 25))
                         {
-                            _windowManager.UpdateViewLayout(_floatingView, _layoutParams);
+                            _svc._btnIsMoving = true;
                         }
-                        catch { }
-                    }
-                    return true;
 
-                case MotionEventActions.Up:
-                    if (_isDragging)
-                    {
-                        // Simpan posisi terakhir tombol
-                        AppSettings.SetFloatingX(this, _layoutParams.X);
-                        AppSettings.SetFloatingY(this, _layoutParams.Y);
-                    }
-                    return true;
+                        if (_svc._btnIsMoving)
+                        {
+                            _svc._buttonLayoutParams.X = _svc._btnInitX + (int)dx;
+                            _svc._buttonLayoutParams.Y = _svc._btnInitY + (int)dy;
+                            try
+                            {
+                                _svc._windowManager.UpdateViewLayout(_svc._floatingButtonView, _svc._buttonLayoutParams);
+                            }
+                            catch { }
+                        }
+                        return true;
+
+                    case MotionEventActions.Up:
+                        if (!_svc._btnIsMoving)
+                        {
+                            // Ini adalah sentuhan/tap!
+                            long now = SystemClock.ElapsedRealtime();
+                            long diff = now - _svc._btnLastTapTime;
+
+                            string tapMode = AppSettings.GetTapTriggerMode(_svc);
+
+                            if (tapMode == "single")
+                            {
+                                // 1x Sentuh langsung matikan / siaga
+                                _svc.TriggerScreenOffAction();
+                            }
+                            else
+                            {
+                                // 2x Sentuh (rentang waktu santai 80ms s/d 550ms)
+                                if (diff >= 80 && diff <= 550)
+                                {
+                                    _svc._btnLastTapTime = 0;
+                                    _svc.TriggerScreenOffAction();
+                                }
+                                else
+                                {
+                                    _svc._btnLastTapTime = now;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Selesai geser, simpan posisi
+                            AppSettings.SetFloatingX(_svc, _svc._buttonLayoutParams.X);
+                            AppSettings.SetFloatingY(_svc, _svc._buttonLayoutParams.Y);
+                        }
+                        return true;
+                }
+
+                return false;
             }
-
-            return false;
         }
 
-        // GestureDetector.IOnDoubleTapListener
-        public bool OnDoubleTap(MotionEvent e)
+        // Listener Sentuh Bilah Status Bar Atas
+        private class TopBarTouchListener : Java.Lang.Object, View.IOnTouchListener
         {
-            ExecuteDoubleTapAction();
-            return true;
+            private readonly FloatingOverlayService _svc;
+
+            public TopBarTouchListener(FloatingOverlayService svc) => _svc = svc;
+
+            public bool OnTouch(View? v, MotionEvent? e)
+            {
+                if (e == null) return false;
+
+                if (e.Action == MotionEventActions.Down)
+                {
+                    long now = SystemClock.ElapsedRealtime();
+                    long diff = now - _svc._topBarLastTapTime;
+
+                    if (diff >= 80 && diff <= 550)
+                    {
+                        _svc._topBarLastTapTime = 0;
+                        _svc.TriggerScreenOffAction();
+                        return true;
+                    }
+                    else
+                    {
+                        _svc._topBarLastTapTime = now;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
-
-        public bool OnDoubleTapEvent(MotionEvent e) => false;
-        public bool OnSingleTapConfirmed(MotionEvent e) => false;
-
-        // GestureDetector.IOnGestureListener
-        public bool OnDown(MotionEvent e) => true;
-        public bool OnFling(MotionEvent? e1, MotionEvent e2, float velocityX, float velocityY) => false;
-        public void OnLongPress(MotionEvent e) { }
-        public bool OnScroll(MotionEvent? e1, MotionEvent e2, float distanceX, float distanceY) => false;
-        public void OnShowPress(MotionEvent e) { }
-        public bool OnSingleTapUp(MotionEvent e) => false;
 
         private void CreateNotificationChannel()
         {
@@ -317,7 +439,7 @@ namespace KassenDoubleTapScreen
                     NotificationImportance.Low
                 )
                 {
-                    Description = "Tombol melayang untuk mematikan layar POS Kassen"
+                    Description = "Layanan aktif untuk mematikan layar POS Kassen"
                 };
 
                 var notificationManager = (NotificationManager?)GetSystemService(NotificationService);
@@ -347,7 +469,7 @@ namespace KassenDoubleTapScreen
 #pragma warning restore CA1422
 
             builder.SetContentTitle("Kassen Double Tap Layar")
-                   .SetContentText("Tombol melayang aktif di layar POS.")
+                   .SetContentText("Ketuk tombol atau bilah atas layar untuk mematikan.")
                    .SetSmallIcon(Resource.Drawable.ic_lock_power)
                    .SetContentIntent(pendingIntent)
                    .SetOngoing(true);

@@ -9,6 +9,8 @@ namespace KassenDoubleTapScreen
         private const string KeyServiceEnabled = "key_service_enabled";
         private const string KeyOperationMode = "key_operation_mode"; // "standby" or "lock"
         private const string KeyFloatingEnabled = "key_floating_enabled";
+        private const string KeyTopBarEnabled = "key_topbar_enabled"; // Bilah sentuh atas
+        private const string KeyTapTriggerMode = "key_tap_trigger_mode"; // "double" or "single"
         private const string KeyVibrateEnabled = "key_vibrate_enabled";
         private const string KeyFloatingAlpha = "key_floating_alpha"; // 10..100
         private const string KeyFloatingSize = "key_floating_size"; // 0: Small, 1: Normal, 2: Large
@@ -23,7 +25,7 @@ namespace KassenDoubleTapScreen
         }
 
         public static bool IsServiceEnabled(Context context) =>
-            GetPrefs(context)?.GetBoolean(KeyServiceEnabled, false) ?? false;
+            GetPrefs(context)?.GetBoolean(KeyServiceEnabled, true) ?? true;
 
         public static void SetServiceEnabled(Context context, bool enabled) =>
             GetPrefs(context)?.Edit()?.PutBoolean(KeyServiceEnabled, enabled)?.Apply();
@@ -40,6 +42,18 @@ namespace KassenDoubleTapScreen
         public static void SetFloatingEnabled(Context context, bool enabled) =>
             GetPrefs(context)?.Edit()?.PutBoolean(KeyFloatingEnabled, enabled)?.Apply();
 
+        public static bool IsTopBarEnabled(Context context) =>
+            GetPrefs(context)?.GetBoolean(KeyTopBarEnabled, true) ?? true;
+
+        public static void SetTopBarEnabled(Context context, bool enabled) =>
+            GetPrefs(context)?.Edit()?.PutBoolean(KeyTopBarEnabled, enabled)?.Apply();
+
+        public static string GetTapTriggerMode(Context context) =>
+            GetPrefs(context)?.GetString(KeyTapTriggerMode, "double") ?? "double";
+
+        public static void SetTapTriggerMode(Context context, string mode) =>
+            GetPrefs(context)?.Edit()?.PutString(KeyTapTriggerMode, mode)?.Apply();
+
         public static bool IsVibrateEnabled(Context context) =>
             GetPrefs(context)?.GetBoolean(KeyVibrateEnabled, true) ?? true;
 
@@ -47,7 +61,7 @@ namespace KassenDoubleTapScreen
             GetPrefs(context)?.Edit()?.PutBoolean(KeyVibrateEnabled, enabled)?.Apply();
 
         public static int GetFloatingAlpha(Context context) =>
-            GetPrefs(context)?.GetInt(KeyFloatingAlpha, 80) ?? 80;
+            GetPrefs(context)?.GetInt(KeyFloatingAlpha, 85) ?? 85;
 
         public static void SetFloatingAlpha(Context context, int alpha) =>
             GetPrefs(context)?.Edit()?.PutInt(KeyFloatingAlpha, alpha)?.Apply();
@@ -77,7 +91,7 @@ namespace KassenDoubleTapScreen
             GetPrefs(context)?.Edit()?.PutBoolean(KeySensorWakeEnabled, enabled)?.Apply();
 
         public static int GetSensorSensitivity(Context context) =>
-            GetPrefs(context)?.GetInt(KeySensorSensitivity, 1) ?? 1;
+            GetPrefs(context)?.GetInt(KeySensorSensitivity, 2) ?? 2; // Default sensitivitas tinggi
 
         public static void SetSensorSensitivity(Context context, int sensitivity) =>
             GetPrefs(context)?.Edit()?.PutInt(KeySensorSensitivity, sensitivity)?.Apply();

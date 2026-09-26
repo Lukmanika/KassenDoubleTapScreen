@@ -1,3 +1,4 @@
+using System;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -21,16 +22,18 @@ namespace KassenDoubleTapScreen
         private GestureDetector? _gestureDetector;
         private TextView? _tvHint;
         private Vibrator? _vibrator;
+        private long _lastTouchDownTime = 0;
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
-            // Pastikan layar bisa tampil di atas lock screen dan tetap aktif saat standby
             if (Build.VERSION.SdkInt >= BuildVersionCodes.OMr1)
             {
+#pragma warning disable CA1416
                 SetShowWhenLocked(true);
                 SetTurnScreenOn(true);
+#pragma warning restore CA1416
             }
             else
             {
@@ -56,7 +59,9 @@ namespace KassenDoubleTapScreen
             SetContentView(Resource.Layout.activity_standby);
 
             _tvHint = FindViewById<TextView>(Resource.Id.tvStandbyHint);
+#pragma warning disable CA1422
             _vibrator = (Vibrator?)GetSystemService(VibratorService);
+#pragma warning restore CA1422
             _gestureDetector = new GestureDetector(this, this);
             _gestureDetector.SetOnDoubleTapListener(this);
 
@@ -67,6 +72,25 @@ namespace KassenDoubleTapScreen
                 {
                     if (e.Event != null)
                     {
+                        if (e.Event.Action == MotionEventActions.Down)
+                        {
+                            long now = SystemClock.ElapsedRealtime();
+                            long diff = now - _lastTouchDownTime;
+
+                            // Jika dua ketukan berjarak 60ms s/d 650ms, langsung bangunkan layar!
+                            if (diff >= 60 && diff <= 650)
+                            {
+                                _lastTouchDownTime = 0;
+                                WakeUpNow();
+                                return;
+                            }
+                            else
+                            {
+                                _lastTouchDownTime = now;
+                                ShowHintBriefly();
+                            }
+                        }
+
                         _gestureDetector.OnTouchEvent(e.Event);
                     }
                 };
@@ -98,50 +122,54 @@ namespace KassenDoubleTapScreen
             }
         }
 
+        private void WakeUpNow()
+        {
+            VibrateBriefly();
+            Finish();
+#pragma warning disable CA1422
+            OverridePendingTransition(0, 0);
+#pragma warning restore CA1422
+        }
+
         private void VibrateBriefly()
         {
             try
             {
                 if (AppSettings.IsVibrateEnabled(this) && _vibrator != null && _vibrator.HasVibrator)
                 {
+#pragma warning disable CA1422
                     if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                     {
                         _vibrator.Vibrate(VibrationEffect.CreateOneShot(50, VibrationEffect.DefaultAmplitude));
                     }
                     else
                     {
-#pragma warning disable CS0618
                         _vibrator.Vibrate(50);
-#pragma warning restore CS0618
                     }
+#pragma warning restore CA1422
                 }
             }
-            catch
+            catch { }
+        }
+
+        private void ShowHintBriefly()
+        {
+            if (_tvHint != null)
             {
-                // Abaikan error vibrator
+                _tvHint.Alpha = 1.0f;
+                _tvHint.Animate()?.Alpha(0.0f)?.SetDuration(1000)?.Start();
             }
         }
 
         // GestureDetector.IOnDoubleTapListener
         public bool OnDoubleTap(MotionEvent e)
         {
-            VibrateBriefly();
-            Finish();
-            OverridePendingTransition(0, 0);
+            WakeUpNow();
             return true;
         }
 
         public bool OnDoubleTapEvent(MotionEvent e) => false;
-
-        public bool OnSingleTapConfirmed(MotionEvent e)
-        {
-            if (_tvHint != null)
-            {
-                _tvHint.Alpha = 1.0f;
-                _tvHint.Animate()?.Alpha(0.0f)?.SetDuration(1200)?.Start();
-            }
-            return true;
-        }
+        public bool OnSingleTapConfirmed(MotionEvent e) => false;
 
         // GestureDetector.IOnGestureListener
         public bool OnDown(MotionEvent e) => true;
@@ -156,8 +184,7 @@ namespace KassenDoubleTapScreen
             // Jika tombol fisik power, volume, atau back ditekan, segera keluar dari standby
             if (keyCode == Keycode.Back || keyCode == Keycode.VolumeDown || keyCode == Keycode.VolumeUp)
             {
-                Finish();
-                OverridePendingTransition(0, 0);
+                WakeUpNow();
                 return true;
             }
             return base.OnKeyDown(keyCode, e);
