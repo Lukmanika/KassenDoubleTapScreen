@@ -181,13 +181,23 @@ namespace KassenDoubleTapScreen
 
         public override bool OnKeyDown(Keycode keyCode, KeyEvent? e)
         {
-            // Jika tombol fisik power, volume, atau back ditekan, segera keluar dari standby
-            if (keyCode == Keycode.Back || keyCode == Keycode.VolumeDown || keyCode == Keycode.VolumeUp)
+            // Jika tombol fisik power, volume, atau back ditekan, segera bangunkan layar
+            if (keyCode == Keycode.Back || keyCode == Keycode.VolumeDown || keyCode == Keycode.VolumeUp || keyCode == Keycode.Power)
             {
                 WakeUpNow();
                 return true;
             }
             return base.OnKeyDown(keyCode, e);
+        }
+
+        public override bool OnKeyUp(Keycode keyCode, KeyEvent? e)
+        {
+            if (keyCode == Keycode.Back || keyCode == Keycode.VolumeDown || keyCode == Keycode.VolumeUp || keyCode == Keycode.Power)
+            {
+                WakeUpNow();
+                return true;
+            }
+            return base.OnKeyUp(keyCode, e);
         }
     }
 }
