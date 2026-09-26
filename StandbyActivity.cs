@@ -13,7 +13,8 @@ namespace KassenDoubleTapScreen
         LaunchMode = LaunchMode.SingleTask,
         ExcludeFromRecents = true,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.KeyboardHidden,
-        ScreenOrientation = ScreenOrientation.Portrait
+        ScreenOrientation = ScreenOrientation.Portrait,
+        Exported = false
     )]
     public class StandbyActivity : Activity, GestureDetector.IOnGestureListener, GestureDetector.IOnDoubleTapListener
     {

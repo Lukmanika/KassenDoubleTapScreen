@@ -10,7 +10,8 @@ namespace KassenDoubleTapScreen
         Theme = "@android:style/Theme.Translucent.NoTitleBar",
         ExcludeFromRecents = true,
         ShowWhenLocked = true,
-        TurnScreenOn = true
+        TurnScreenOn = true,
+        Exported = false
     )]
     public class WakeActivity : Activity
     {

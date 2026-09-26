@@ -15,7 +15,8 @@ namespace KassenDoubleTapScreen
         MainLauncher = true,
         Icon = "@mipmap/appicon",
         Theme = "@android:style/Theme.Material.Light.NoActionBar",
-        WindowSoftInputMode = SoftInput.AdjustResize
+        WindowSoftInputMode = SoftInput.AdjustResize,
+        Exported = true
     )]
     public class MainActivity : Activity
     {
